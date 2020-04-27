@@ -1,0 +1,37 @@
+{
+    "name": "3slab/vdm-library-http-transport-bundle",
+    "description": "Vdm Http Transport",
+    "type": "symfony-bundle",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Jonathan Bouzekri",
+            "email": "jonathan.bouzekri@suez.com"
+        },
+        {
+            "name": "Julian Marié",
+            "email": "julian.marie@free.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Vdm\\Bundle\\LibraryHttpTransportBundle\\": ""
+        }
+    },
+    "require": {
+        "3slab/vdm-library-bundle": "dev-master",
+        "symfony/http-client": "^5.0"
+    },
+    "require-dev": {
+        "ext-xml": "*",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "phpunit/phpunit": "^9"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/jmarie/Workspace/VdmLibraryBundle/"
+        }
+    ]
+}
