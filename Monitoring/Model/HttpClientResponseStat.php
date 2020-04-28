@@ -68,8 +68,10 @@ class HttpClientResponseStat implements StatModelInterface
 
     public function getStats(): array
     {
-        //new statItem() // Serializer pour le null
-        $array = [];
+        $tags = [
+            "statusCode" => $this->getStatusCode()
+        ];
+        $array[] = new StatItems('increment', 'http.status_code.counter', 1, $tags);
 
         if ($this->getTime() !== null) {
             $array[] = new StatItems('gauge', 'http.response_time', $this->getTime());
@@ -78,11 +80,6 @@ class HttpClientResponseStat implements StatModelInterface
         if ($this->getBodySize() !== null) {
             $array[] = new StatItems('gauge', 'http.body_size', $this->getBodySize());
         }
-
-        $tags = [
-            "statusCode" => $this->getStatusCode()
-        ];
-        $array[] = new StatItems('increment', 'http.status_code.counter', 1, $tags);
 
         return  $array;
     }

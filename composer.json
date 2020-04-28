@@ -19,7 +19,7 @@
         }
     },
     "require": {
-        "3slab/vdm-library-bundle": "dev-master",
+        "3slab/vdm-library-bundle": "^2.0@beta",
         "symfony/http-client": "^5.0"
     },
     "require-dev": {
@@ -27,11 +27,5 @@
         "ext-curl": "*",
         "ext-mbstring": "*",
         "phpunit/phpunit": "^9"
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/home/jmarie/Workspace/VdmLibraryBundle/"
-        }
-    ]
+    }
 }
