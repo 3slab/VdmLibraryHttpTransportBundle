@@ -23,14 +23,14 @@ class DefaultHttpExecutorTest extends TestCase
     private $logger;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $serializer
-     */
-    private $serializer;
-
-    /**
      * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
      */
     private $httpClient;
+
+    /**
+     * @var DefaultHttpExecutor $httpExecutor
+     */
+    private $httpExecutor;
 
     protected function setUp(): void
     {
