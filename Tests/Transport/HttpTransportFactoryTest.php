@@ -46,7 +46,7 @@ class HttpTransportFactoryTest extends TestCase
         $this->statsStorageInterface = $this->getMockBuilder(StatsStorageInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->serializer, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
         $this->httpClientBehaviorFactoryRegistry = $this
                         ->getMockBuilder(HttpClientBehaviorFactoryRegistry::class)
                         ->setConstructorArgs([$this->logger])

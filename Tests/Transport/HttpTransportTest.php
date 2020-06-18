@@ -42,9 +42,8 @@ class HttpTransportTest extends TestCase
     protected function setUp(): void
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->serializer, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
     }
 
     public function testGet()
