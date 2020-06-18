@@ -10,7 +10,6 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Executor;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Vdm\Bundle\LibraryBundle\Model\Message;
 use Vdm\Bundle\LibraryBundle\Stamp\StopAfterHandleStamp;
@@ -22,20 +21,13 @@ class DefaultHttpExecutor extends AbstractHttpExecutor
     */
     private $logger;
 
-    /** 
-     * @var SerializerInterface 
-    */
-    private $serializer;
-
     public function __construct(
         LoggerInterface $logger,
-        SerializerInterface $serializer,
         HttpClientInterface $httpClient
     ) 
     {
         parent::__construct($httpClient);
         $this->logger = $logger;
-        $this->serializer = $serializer;
     }
 
     public function execute(string $dsn, string $method, array $options): iterable

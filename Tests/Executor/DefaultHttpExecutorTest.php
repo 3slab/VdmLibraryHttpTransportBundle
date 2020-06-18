@@ -10,7 +10,6 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Executor;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
@@ -33,17 +32,11 @@ class DefaultHttpExecutorTest extends TestCase
      */
     private $httpClient;
 
-    /**
-     * @var DefaultHttpExecutor $httpExecutor
-     */
-    private $httpExecutor;
-
     protected function setUp(): void
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->serializer, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
     }
 
     public function testExecute()
