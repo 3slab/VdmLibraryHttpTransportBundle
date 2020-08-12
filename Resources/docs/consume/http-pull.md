@@ -2,6 +2,12 @@
 
 This source can collect data from an HTTP API.
 
+## Installation
+
+```bash
+composer require 3slab/vdm-library-http-transport-bundle
+```
+
 ## Configuration reference
 
 ```
