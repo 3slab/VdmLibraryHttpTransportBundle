@@ -32,10 +32,10 @@ class DefaultHttpExecutor extends AbstractHttpExecutor
 
     public function execute(string $dsn, string $method, array $options): iterable
     {
-        // Get a message from "website"
-        $this->logger->debug('Init Http Client...');
+        // In HttpClient, request just build the request but does not execute it
         $response = $this->httpClient->request($method, $dsn, $options);
-        $this->logger->debug('Request exec...');
+
+        $this->logger->debug(sprintf('%s - Requesting %s %s', static::class, $method, $dsn));
 
         $message = new HttpMessage($response->getContent());
         yield new Envelope($message, [new StopAfterHandleStamp()]);

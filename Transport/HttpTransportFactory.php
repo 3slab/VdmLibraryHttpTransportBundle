@@ -77,13 +77,13 @@ class HttpTransportFactory implements TransportFactoryInterface
             $executor = $this->httpExecutorRegistry->get($options['http_executor']);
         }
 
-        $this->logger->debug('Create decorator');
+        $this->logger->debug(sprintf('Http executor loaded is an instance of "%s"', get_class($executor)));
+
         $httpClientDecorated = $this->httpClientBehaviorFactoryRegistry->create(
             $executor->getHttpClient(),
             $options
         );
         $executor->setHttpClient($httpClientDecorated);
-        $this->logger->debug('Set new decorator');
 
         return new HttpTransport($executor, $dsn, $method, $http_options);
     }

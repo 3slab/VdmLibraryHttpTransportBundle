@@ -65,12 +65,10 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
         try {
-            $this->logger->info(sprintf('Trying request %s with method %s', $url, $method));
             $response = $this->httpClientDecorated->request($method, $url, $options);
             $statusCode = $response->getStatusCode();
             $response->getHeaders(); // Use to retry in case of exception
-            $this->logger->info(sprintf('Request done with status code: %s', $statusCode));
-            $this->count = 0;
+            $this->count = 0; // reset in case the client is reused for another request
         } catch (TransportException $transportException) {
             $response = $this->manageException($transportException, $method, $url, $options);
         } catch (ServerException $serverException) {
@@ -103,13 +101,16 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
         string $url,
         array $options = []
     ): ResponseInterface {
-        $this->logger->error(sprintf('%s: %s', get_class($exception), $exception->getMessage()));
+        $this->logger->error(
+            sprintf('%s: %s', get_class($exception), $exception->getMessage()),
+            ['exception' => $exception]
+        );
 
         if ($this->count < $this->retry) {
             $this->count++;
-            $this->logger->info(
+            $this->logger->debug(
                 sprintf(
-                    'Wait %d second before retry; number of retry: %d',
+                    'Waiting %d second before retrying; retry attempt nb %d',
                     $this->timeBeforeRetry * $this->count,
                     $this->count
                 )
@@ -117,7 +118,7 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
             sleep($this->timeBeforeRetry * $this->count);
             $response = $this->request($method, $url, $options);
         } else {
-            $this->count = 0;
+            $this->count = 0; // reset counter if it failed after all retry attempt in case the client is reused later
 
             throw $exception;
         }

@@ -46,30 +46,35 @@ class MonitoringHttpClientSubscriber implements EventSubscriberInterface
      * Method executed on HttpClientReceivedResponseEvent event
      *
      * @param HttpClientReceivedResponseEvent $event
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function onHttpClientReceivedResponseEvent(HttpClientReceivedResponseEvent $event): void
     {
         $response = $event->getResponse();
         $statusCode = $response->getStatusCode();
-
         $responseInfo = $response->getInfo();
 
         $bodySize = $responseInfo['size_download'];
         $time = $responseInfo['total_time'];
 
-        $this->logger->debug(sprintf('statusCode: %s', $statusCode));
-        $this->logger->debug(sprintf('bodySize: %d', $bodySize));
-        $this->logger->debug(sprintf('execution time: %.2f', $time));
-
         $tags = [
-            "statusCode" => $this->getStatusCode()
+            "statusCode" => $statusCode
         ];
         $this->monitoring->increment(static::STATUS_CODE_STAT, 1, $tags);
+        $this->logger->debug(sprintf('http status code %s metric incremented', $statusCode));
+
         if ($time) {
             $this->monitoring->update(static::RESPONSE_TIME_STAT, $time, $tags);
+            $this->logger->debug('http response time metric collected : {responseTime}', [
+                'responseTime' => $time
+            ]);
         }
+
         if ($bodySize) {
             $this->monitoring->update(static::RESPONSE_SIZE_STAT, $bodySize, $tags);
+            $this->logger->debug('http response size metric collected : {responseSize}', [
+                'responseSize' => $bodySize
+            ]);
         }
     }
 

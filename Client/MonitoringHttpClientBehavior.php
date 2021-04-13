@@ -52,7 +52,7 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
     {
         try {
             $response = $this->httpClientDecorated->request($method, $url, $options);
-            $response->getHeaders(); // Use to monitore in case of exception
+            $response->getHeaders(); // Use to trigger in case of exception
             $this->eventDispatcher->dispatch(new HttpClientReceivedResponseEvent($response));
         } catch (TransportException $transportException) {
             $response = new ErrorResponse($url, $method);
@@ -63,17 +63,6 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
         } catch (ClientException $clientException) {
             $response = $clientException->getResponse();
             $this->manageException($clientException, $response);
-        } catch (\Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    'Error before request %s with method %s with this exception: %s',
-                    $url,
-                    $method,
-                    $exception->getMessage()
-                )
-            );
-
-            throw $exception;
         }
 
         return $response;
@@ -91,7 +80,10 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
      */
     private function manageException(ExceptionInterface $exception, ResponseInterface $response): void
     {
-        $this->logger->error(sprintf('%s: %s', get_class($exception), $exception->getMessage()));
+        $this->logger->error(
+            sprintf('%s: %s', get_class($exception), $exception->getMessage()),
+            ['exception' => $exception]
+        );
 
         $this->eventDispatcher->dispatch(new HttpClientReceivedResponseEvent($response));
 
