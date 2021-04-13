@@ -1,6 +1,6 @@
-# Source HTTP Pull
+# VdmLibrary messenger HTTP transport
 
-This source can collect data from an HTTP API.
+This symfony messenger extension provides a transport to pull data from a HTTP source. 
 
 ## Installation
 
@@ -21,6 +21,7 @@ framework:
                 options:
                     method: GET
                     http_options: {}
+                    http_executor: ~
                     monitoring:
                         enabled: true
                     retry:
@@ -35,20 +36,21 @@ dsn | the url you want to collect (needs to start by http or https)
 retry_strategy.max_retries | needs to be 0 because http transport does not support this feature
 options.method | HTTP method to be called
 options.http_options | options supported on request by the [symfony http client](https://symfony.com/doc/current/components/http_client.html#making-requests)
+options.http_executor | set the id (in the container of services) of a custom http executor to use instead of the [DefaultHttpExecutor](./Executor/DefaultHttpExecutor.php)
 options.monitoring.enabled | if true, hook up in the vdm library bundle monitoring system to send information about the HTTP response
 options.retry.enabled | if true, retry an http call in case of error
 options.retry.number | number of time to retry before stopping with error
 options.retry.timeBeforeRetry | time in second between each try (multiplied by the current retry number to delay)
 
-## Custom http executor
+## HTTP Executor
 
-A custom http executor allows you to customize how you call the API. It could be because the API is paginated or needs 
-a pre-request for authentication.
+HTTP executor allows you to customize the behavior of the HTTP transport per transport definition inside your `messenger.yaml` file.
+Some example use cases are that the API has a pagination or needs a pre-request for authentication.
 
-Just create a class in your project that extends `Vdm\Bundle\LibraryBundle\Executor\Http\AbstractHttpExecutor`. It will
-automatically replace the default executor.
+If you don't set a custom `http_executor` option when declaring the transport, the default [DefaultHttpExecutor](./Executor/DefaultHttpExecutor.php) is used
+which just calls the API using the default Symfony http client with the `method` and `http_options` you have configured.
 
-**If you have 2 custom executor. Only a single one will be used, the second is ignored.**
+You can override this behavior in your project by providing a class that extends `Vdm\Bundle\LibraryBundle\Executor\Http\AbstractHttpExecutor`.
 
 ```
 namespace App\Executor\Http;
@@ -87,13 +89,24 @@ class CustomHttpExecutor extends AbstractHttpExecutor
 
 There are 2 important things your custom executor needs to do :
 
-* `yield` a new envelope with a VDM Message instance
-*  Add a `StopAfterHandleStamp` stamp to the yielded envelope if you want to stop after handling the message (if not, 
-   the messenger worker loop over and will execute it once again)
-   
+* `yield` a new envelope
+*  Add a `StopAfterHandleStamp` stamp to the yielded envelope if you want to stop after handling the last message 
+   (if not, the messenger worker may loop over and will execute it once again without stopping)
+
 *Note : thanks to the yield system, you can implement a loop in your execute function and return items once at a time*
 
 *Note : you can keep state in your custom executor so if it is executed again, adapt your API call*
+
+Then references this custom executor in your transport definition in your project `messenger.yaml` :
+
+```
+framework:
+    messenger:
+        transports:
+            api-call:
+                options:
+                    http_executor: App\Executor\Http\CustomHttpExecutor
+```
 
 ## Monitoring
 
