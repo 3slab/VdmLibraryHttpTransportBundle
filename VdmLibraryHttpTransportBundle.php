@@ -10,14 +10,14 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler\HttpClientBehaviorCreateCompilerPass;
-use Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler\SetHttpExecutorCompilerPass;
+use Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler\HttpClientBehaviorFactoryCompilerPass;
+use Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler\HttpExecutorCompilerPass;
 
 class VdmLibraryHttpTransportBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {
-        $container->addCompilerPass(new SetHttpExecutorCompilerPass());
-        $container->addCompilerPass(new HttpClientBehaviorCreateCompilerPass());
+        $container->addCompilerPass(new HttpExecutorCompilerPass());
+        $container->addCompilerPass(new HttpClientBehaviorFactoryCompilerPass());
     }
 }

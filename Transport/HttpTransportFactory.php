@@ -14,8 +14,12 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
-use Vdm\Bundle\LibraryHttpTransportBundle\Executor\AbstractHttpExecutor;
+use Vdm\Bundle\LibraryHttpTransportBundle\Executor\HttpExecutorRegistry;
 
+/**
+ * Class HttpTransportFactory
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\Transport
+ */
 class HttpTransportFactory implements TransportFactoryInterface
 {
     private const DSN_PROTOCOL_HTTP = 'http://';
@@ -27,9 +31,9 @@ class HttpTransportFactory implements TransportFactoryInterface
     ];
 
     /**
-     * @var AbstractHttpExecutor $httpExecutor
+     * @var HttpExecutorRegistry $httpExecutorRegistry
      */
-    private $httpExecutor;
+    private $httpExecutorRegistry;
 
     /**
      * @var HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry
@@ -43,16 +47,16 @@ class HttpTransportFactory implements TransportFactoryInterface
 
     /**
      * HttpTransportFactory constructor.
-     * @param AbstractHttpExecutor $httpExecutor
+     * @param HttpExecutorRegistry $httpExecutorRegistry
      * @param HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry
      * @param LoggerInterface $vdmLogger
      */
     public function __construct(
-        AbstractHttpExecutor $httpExecutor,
+        HttpExecutorRegistry $httpExecutorRegistry,
         HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry,
-        LoggerInterface $vdmLogger
+        LoggerInterface $vdmLogger = null
     ) {
-        $this->httpExecutor = $httpExecutor;
+        $this->httpExecutorRegistry = $httpExecutorRegistry;
         $this->httpClientBehaviorFactoryRegistry = $httpClientBehaviorFactoryRegistry;
         $this->logger = $vdmLogger ?? new NullLogger();
     }
@@ -68,17 +72,27 @@ class HttpTransportFactory implements TransportFactoryInterface
         $method = $options['method'];
         $http_options = $options['http_options'];
 
+        $executor = $this->httpExecutorRegistry->getDefault();
+        if (isset($options['http_executor'])) {
+            $executor = $this->httpExecutorRegistry->get($options['http_executor']);
+        }
+
         $this->logger->debug('Create decorator');
         $httpClientDecorated = $this->httpClientBehaviorFactoryRegistry->create(
-            $this->httpExecutor->getHttpClient(),
+            $executor->getHttpClient(),
             $options
         );
-        $this->httpExecutor->setHttpClient($httpClientDecorated);
+        $executor->setHttpClient($httpClientDecorated);
         $this->logger->debug('Set new decorator');
 
-        return new HttpTransport($this->httpExecutor, $dsn, $method, $http_options);
+        return new HttpTransport($executor, $dsn, $method, $http_options);
     }
 
+    /**
+     * @param string $dsn
+     * @param array $options
+     * @return bool
+     */
     public function supports(string $dsn, array $options): bool
     {
         foreach (self::DSN_PROTOCOLS as $protocol) {

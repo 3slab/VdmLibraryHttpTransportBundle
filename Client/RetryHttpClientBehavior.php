@@ -33,6 +33,13 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
     */
     protected $timeBeforeRetry;
 
+    /**
+     * RetryHttpClientBehavior constructor.
+     * @param HttpClientInterface $httpClient
+     * @param int $retry
+     * @param int $timeBeforeRetry
+     * @param LoggerInterface|null $logger
+     */
     public function __construct(
         HttpClientInterface $httpClient,
         int $retry,
@@ -44,6 +51,17 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
         $this->timeBeforeRetry = $timeBeforeRetry;
     }
 
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws ExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
         try {
@@ -73,6 +91,11 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
      * @param array $options list of options
      *
      * @return ResponseInterface
+     * @throws ExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     private function manageException(
         ExceptionInterface $exception,

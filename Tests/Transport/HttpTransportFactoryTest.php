@@ -13,49 +13,36 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
+use Vdm\Bundle\LibraryHttpTransportBundle\Executor\HttpExecutorRegistry;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransportFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransport;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
 
 class HttpTransportFactoryTest extends TestCase
 {
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $logger
-     */
-    private $logger;
+    protected $httpTransportFactory;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $serializer
+     * {@inheritDoc}
      */
-    private $serializer;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
-     */
-    private $httpClient;
-
-    /**
-     * @var DefaultHttpExecutor $httpExecutor
-     */
-    private $httpExecutor;
-
     protected function setUp(): void
     {
-        $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->httpClient, $this->logger);
-        $this->httpClientBehaviorFactoryRegistry = $this
-                        ->getMockBuilder(HttpClientBehaviorFactoryRegistry::class)
-                        ->setConstructorArgs([$this->logger])
-                        ->setMethods(['create'])
-                        ->getMock();
+        parent::setUp();
 
-        $this->httpClientBehaviorFactoryRegistry->method('create')->willReturn($this->httpClient);
+        $httpClient = $this->createMock(HttpClientInterface::class);
+
+        $httpExecutorRegistry = new HttpExecutorRegistry();
+        $httpExecutorRegistry->addExecutor(new DefaultHttpExecutor($httpClient), DefaultHttpExecutor::class);
+
+        $httpClientBehaviorFactoryRegistry = $this->createMock(HttpClientBehaviorFactoryRegistry::class);
+        $httpClientBehaviorFactoryRegistry
+            ->expects($this->atMost(1))
+            ->method('create')
+            ->willReturn($httpClient);
+
         $this->httpTransportFactory = new HttpTransportFactory(
-            $this->httpExecutor,
-            $this->httpClientBehaviorFactoryRegistry,
-            $this->logger
+            $httpExecutorRegistry,
+            $httpClientBehaviorFactoryRegistry
         );
     }
 
@@ -66,7 +53,9 @@ class HttpTransportFactoryTest extends TestCase
             'method' => "GET",
             'http_options' => [],
         ];
-        $transport = $this->httpTransportFactory->createTransport($dsn, $options, $this->serializer);
+
+        $serializer = $this->createMock(SerializerInterface::class);
+        $transport = $this->httpTransportFactory->createTransport($dsn, $options, $serializer);
 
         $this->assertInstanceOf(HttpTransport::class, $transport);
     }

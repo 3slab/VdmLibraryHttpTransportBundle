@@ -14,6 +14,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
+/**
+ * Class DecoratorHttpClient
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\Client
+ */
 abstract class DecoratorHttpClient implements HttpClientInterface
 {
     /**
@@ -26,6 +30,11 @@ abstract class DecoratorHttpClient implements HttpClientInterface
     */
     protected $httpClientDecorated;
 
+    /**
+     * DecoratorHttpClient constructor.
+     * @param HttpClientInterface $httpClient
+     * @param LoggerInterface|null $vdmLogger
+     */
     public function __construct(HttpClientInterface $httpClient, LoggerInterface $vdmLogger = null)
     {
         $this->httpClientDecorated = $httpClient;

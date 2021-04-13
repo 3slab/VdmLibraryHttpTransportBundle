@@ -19,6 +19,10 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\Event\HttpClientReceivedResponseEvent;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\Model\ErrorResponse;
 
+/**
+ * Class MonitoringHttpClientBehavior
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\Client
+ */
 class MonitoringHttpClientBehavior extends DecoratorHttpClient
 {
     /**
@@ -28,6 +32,9 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
 
     /**
      * MonitoringHttpClientBehavior constructor
+     * @param HttpClientInterface $httpClient
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param LoggerInterface|null $vdmLogger
      */
     public function __construct(
         HttpClientInterface $httpClient,

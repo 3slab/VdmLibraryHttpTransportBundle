@@ -12,6 +12,10 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * Class HttpClientBehaviorFactoryRegistry
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\Client
+ */
 class HttpClientBehaviorFactoryRegistry
 {
     /**
@@ -29,19 +33,32 @@ class HttpClientBehaviorFactoryRegistry
     */
     private $httpClientBehavior;
 
+    /**
+     * HttpClientBehaviorFactoryRegistry constructor.
+     * @param LoggerInterface|null $vdmLogger
+     */
     public function __construct(LoggerInterface $vdmLogger = null)
     {
         $this->httpClientBehavior = [];
         $this->logger = $vdmLogger ?? new NullLogger();
     }
 
-    public function addFactory(HttpClientBehaviorFactoryInterface $httpClientBehavior, string $priority)
+    /**
+     * @param HttpClientBehaviorFactoryInterface $httpClientBehavior
+     * @param string $priority
+     */
+    public function addFactory(HttpClientBehaviorFactoryInterface $httpClientBehavior, string $priority): void
     {
         $this->httpClientBehavior[$priority] = $httpClientBehavior;
         ksort($this->httpClientBehavior);
     }
 
-    public function create($httpClient, array $options)
+    /**
+     * @param $httpClient
+     * @param array $options
+     * @return HttpClientInterface
+     */
+    public function create($httpClient, array $options): HttpClientInterface
     {
         $this->httpClient = $httpClient;
 

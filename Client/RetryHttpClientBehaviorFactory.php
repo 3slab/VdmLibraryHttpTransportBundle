@@ -11,18 +11,32 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * Class RetryHttpClientBehaviorFactory
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\Client
+ */
 class RetryHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterface
 {
-    public static function priority(int $priority = 0)
+    /**
+     * @param int $priority
+     * @return int
+     */
+    public static function priority(int $priority = 0): int
     {
         return $priority;
     }
 
+    /**
+     * @param HttpClientInterface $httpClient
+     * @param array $options
+     * @param LoggerInterface|null $logger
+     * @return HttpClientInterface
+     */
     public function createDecoratedHttpClient(
         HttpClientInterface $httpClient,
         array $options,
         LoggerInterface $logger = null
-    ) {
+    ): HttpClientInterface {
         $number = 5;
         $timeBeforeRetry = 5;
 
@@ -36,7 +50,11 @@ class RetryHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterfa
         return new RetryHttpClientBehavior($httpClient, $number, $timeBeforeRetry, $logger);
     }
 
-    public function support(array $options)
+    /**
+     * @param array $options
+     * @return bool
+     */
+    public function support(array $options): bool
     {
         if (isset($options['retry']['enabled']) && $options['retry']['enabled'] === true) {
             return true;

@@ -13,13 +13,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 interface HttpClientBehaviorFactoryInterface
 {
-    public static function priority(int $priority = 0);
+    public static function priority(int $priority = 0): int;
 
     public function createDecoratedHttpClient(
         HttpClientInterface $httpClient,
         array $options,
         LoggerInterface $logger = null
-    );
+    ): HttpClientInterface;
 
-    public function support(array $options);
+    public function support(array $options): bool;
 }

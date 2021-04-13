@@ -13,8 +13,15 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
 
-class HttpClientBehaviorCreateCompilerPass implements CompilerPassInterface
+/**
+ * Class HttpClientBehaviorFactoryCompilerPass
+ * @package Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler
+ */
+class HttpClientBehaviorFactoryCompilerPass implements CompilerPassInterface
 {
+    /**
+     * @param ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->has(HttpClientBehaviorFactoryRegistry::class)) {
