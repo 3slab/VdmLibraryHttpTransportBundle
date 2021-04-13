@@ -10,9 +10,11 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Transport;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\TransportInterface;
+use Vdm\Bundle\LibraryBundle\Stamp\StopAfterHandleStamp;
+use Vdm\Bundle\LibraryBundle\Transport\TransportCollectableInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\AbstractHttpExecutor;
 
-class HttpTransport implements TransportInterface
+class HttpTransport implements TransportInterface, TransportCollectableInterface
 {
     /**
      * @var AbstractHttpExecutor $httpExecutor
@@ -34,6 +36,14 @@ class HttpTransport implements TransportInterface
     */
     private $options;
 
+    /**
+     * HttpTransport constructor.
+     *
+     * @param AbstractHttpExecutor $httpExecutor
+     * @param string $dsn
+     * @param string $method
+     * @param array $options
+     */
     public function __construct(AbstractHttpExecutor $httpExecutor, string $dsn, string $method, array $options)
     {
         $this->httpExecutor = $httpExecutor;
@@ -42,9 +52,27 @@ class HttpTransport implements TransportInterface
         $this->options = $options;
     }
 
+    /**
+     * @return iterable
+     */
     public function get(): iterable
     {
-        return $this->httpExecutor->execute($this->dsn, $this->method, $this->options);
+        $generator = $this->httpExecutor->execute($this->dsn, $this->method, $this->options);
+        while ($generator->valid()) {
+            /** @var Envelope $envelope */
+            $envelope = $generator->current();
+
+            // Call next before sending to be able to check if we reach the end of the generator
+            $generator->next();
+
+            // if it is the send and the envelope yielded has no StopAfterHandleStamp, add it
+            $stamps = [];
+            if (!$generator->valid() && !$envelope->last(StopAfterHandleStamp::class)) {
+                $stamps[] = new StopAfterHandleStamp();
+            }
+
+            yield $envelope->with(...$stamps);
+        }
     }
 
     /**
@@ -61,6 +89,11 @@ class HttpTransport implements TransportInterface
     {
     }
 
+    /**
+     * @param Envelope $envelope
+     * @return Envelope
+     * @throws \Exception
+     */
     public function send(Envelope $envelope): Envelope
     {
         throw new \Exception('This transport does not support the send action');
