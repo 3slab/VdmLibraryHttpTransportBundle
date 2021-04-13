@@ -9,11 +9,11 @@
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Transport;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
-use Vdm\Bundle\LibraryBundle\Monitoring\StatsStorageInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryRegistry;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\AbstractHttpExecutor;
 
 class HttpTransportFactory implements TransportFactoryInterface
@@ -27,41 +27,52 @@ class HttpTransportFactory implements TransportFactoryInterface
     ];
 
     /**
-     * @var LoggerInterface $logger
-     */
-    private $logger;
-
-    /**
      * @var AbstractHttpExecutor $httpExecutor
      */
     private $httpExecutor;
-
 
     /**
      * @var HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry
      */
     private $httpClientBehaviorFactoryRegistry;
 
+    /**
+     * @var LoggerInterface $logger
+     */
+    private $logger;
+
+    /**
+     * HttpTransportFactory constructor.
+     * @param AbstractHttpExecutor $httpExecutor
+     * @param HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry
+     * @param LoggerInterface $vdmLogger
+     */
     public function __construct(
-        LoggerInterface $logger, 
-        StatsStorageInterface $statsStorage, 
-        AbstractHttpExecutor $httpExecutor, 
-        HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry
-    )
-    {
-        $this->logger = $logger;
-        $this->statsStorage = $statsStorage;
+        AbstractHttpExecutor $httpExecutor,
+        HttpClientBehaviorFactoryRegistry $httpClientBehaviorFactoryRegistry,
+        LoggerInterface $vdmLogger
+    ) {
         $this->httpExecutor = $httpExecutor;
         $this->httpClientBehaviorFactoryRegistry = $httpClientBehaviorFactoryRegistry;
+        $this->logger = $vdmLogger ?? new NullLogger();
     }
 
+    /**
+     * @param string $dsn
+     * @param array $options
+     * @param SerializerInterface $serializer
+     * @return TransportInterface
+     */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
         $method = $options['method'];
         $http_options = $options['http_options'];
 
         $this->logger->debug('Create decorator');
-        $httpClientDecorated = $this->httpClientBehaviorFactoryRegistry->create($this->httpExecutor->getHttpClient(), $options);
+        $httpClientDecorated = $this->httpClientBehaviorFactoryRegistry->create(
+            $this->httpExecutor->getHttpClient(),
+            $options
+        );
         $this->httpExecutor->setHttpClient($httpClientDecorated);
         $this->logger->debug('Set new decorator');
 

@@ -6,16 +6,16 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryRegistry;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\RetryHttpClientBehaviorFactory;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\MonitoringHttpClientBehaviorFactory;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehaviorFactory;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehaviorFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehavior;
 
 class HttpClientBehaviorFactoryRegistryTest extends TestCase
@@ -64,7 +64,6 @@ class HttpClientBehaviorFactoryRegistryTest extends TestCase
             $this->httpClientBehavior->addFactory($retryHttpClientBehaviorFactory, $priorityRetry);
             $this->httpClientBehavior->addFactory($monitoringrHttpClientBehaviorFactory, $priorityMonitoring);
         } catch (\Exception $exception) {
-
         }
 
         $value = $property->getValue($this->httpClientBehavior);

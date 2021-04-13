@@ -6,20 +6,24 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\EventListener;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\EventSubscriber;
 
-use Vdm\Bundle\LibraryBundle\Monitoring\StatsStorageInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
+use Vdm\Bundle\LibraryBundle\Service\Monitoring\MonitoringService;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\Event\HttpClientReceivedResponseEvent;
-use Vdm\Bundle\LibraryHttpTransportBundle\Monitoring\Model\HttpClientResponseStat;
 
 class MonitoringHttpClientSubscriber implements EventSubscriberInterface
 {
+    public const STATUS_CODE_STAT = 'vdm.http.status_code';
+    public const RESPONSE_TIME_STAT = 'vdm.http.response_time';
+    public const RESPONSE_SIZE_STAT = 'http.response_size';
+
     /**
-     * @var StatsStorageInterface
+     * @var MonitoringService
      */
-    private $storage;
+    private $monitoring;
 
     /**
      * @var LoggerInterface
@@ -29,13 +33,13 @@ class MonitoringHttpClientSubscriber implements EventSubscriberInterface
     /**
      * MonitoringHttpClientSubscriber constructor.
      *
-     * @param StatsStorageInterface $storage
-     * @param LoggerInterface|null $messengerLogger
+     * @param MonitoringService $monitoring
+     * @param LoggerInterface|null $vdmLogger
      */
-    public function __construct(StatsStorageInterface $storage, LoggerInterface $messengerLogger = null)
+    public function __construct(MonitoringService $monitoring, LoggerInterface $vdmLogger = null)
     {
-        $this->storage = $storage;
-        $this->logger = $messengerLogger;
+        $this->monitoring = $monitoring;
+        $this->logger = $vdmLogger ?? new NullLogger();
     }
 
     /**
@@ -43,29 +47,37 @@ class MonitoringHttpClientSubscriber implements EventSubscriberInterface
      *
      * @param HttpClientReceivedResponseEvent $event
      */
-    public function onHttpClientReceivedResponseEvent(HttpClientReceivedResponseEvent $event)
+    public function onHttpClientReceivedResponseEvent(HttpClientReceivedResponseEvent $event): void
     {
         $response = $event->getResponse();
         $statusCode = $response->getStatusCode();
-        
+
         $responseInfo = $response->getInfo();
-        
+
         $bodySize = $responseInfo['size_download'];
         $time = $responseInfo['total_time'];
-        
+
         $this->logger->debug(sprintf('statusCode: %s', $statusCode));
         $this->logger->debug(sprintf('bodySize: %d', $bodySize));
         $this->logger->debug(sprintf('execution time: %.2f', $time));
 
-        $httpClientResponseStat = new HttpClientResponseStat($time , $bodySize, $statusCode);
-        $this->storage->sendStat($httpClientResponseStat);
+        $tags = [
+            "statusCode" => $this->getStatusCode()
+        ];
+        $this->monitoring->increment(static::STATUS_CODE_STAT, 1, $tags);
+        if ($time) {
+            $this->monitoring->update(static::RESPONSE_TIME_STAT, $time, $tags);
+        }
+        if ($bodySize) {
+            $this->monitoring->update(static::RESPONSE_SIZE_STAT, $bodySize, $tags);
+        }
     }
 
     /**
      * {@inheritDoc}
      * @codeCoverageIgnore
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             HttpClientReceivedResponseEvent::class => 'onHttpClientReceivedResponseEvent',

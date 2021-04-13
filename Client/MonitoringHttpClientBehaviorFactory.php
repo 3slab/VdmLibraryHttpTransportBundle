@@ -6,12 +6,11 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehavior;
 
 class MonitoringHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterface
 {
@@ -19,8 +18,7 @@ class MonitoringHttpClientBehaviorFactory implements HttpClientBehaviorFactoryIn
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher
-    )
-    {
+    ) {
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -29,9 +27,12 @@ class MonitoringHttpClientBehaviorFactory implements HttpClientBehaviorFactoryIn
         return $priority;
     }
 
-    public function createDecoratedHttpClient(LoggerInterface $logger, HttpClientInterface $httpClient, array $options)
-    {
-        return new MonitoringHttpClientBehavior($logger, $httpClient, $this->eventDispatcher);
+    public function createDecoratedHttpClient(
+        HttpClientInterface $httpClient,
+        array $options,
+        LoggerInterface $logger = null
+    ) {
+        return new MonitoringHttpClientBehavior($httpClient, $this->eventDispatcher, $logger);
     }
 
     public function support(array $options)

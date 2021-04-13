@@ -17,7 +17,7 @@ use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\Event\HttpClientReceivedResponseEvent;
-use Vdm\Bundle\LibraryBundle\Response\ErrorResponse;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\Model\ErrorResponse;
 
 class MonitoringHttpClientBehavior extends DecoratorHttpClient
 {
@@ -30,12 +30,11 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
      * MonitoringHttpClientBehavior constructor
      */
     public function __construct(
-        LoggerInterface $logger, 
-        HttpClientInterface $httpClient, 
-        EventDispatcherInterface $eventDispatcher
-    )
-    {
-        parent::__construct($logger, $httpClient);
+        HttpClientInterface $httpClient,
+        EventDispatcherInterface $eventDispatcher,
+        LoggerInterface $vdmLogger = null
+    ) {
+        parent::__construct($httpClient, $vdmLogger);
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -43,12 +42,12 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
      * {@inheritDoc}
      */
     public function request(string $method, string $url, array $options = []): ResponseInterface
-    {        
+    {
         try {
             $response = $this->httpClientDecorated->request($method, $url, $options);
             $response->getHeaders(); // Use to monitore in case of exception
             $this->eventDispatcher->dispatch(new HttpClientReceivedResponseEvent($response));
-        } catch(TransportException $transportException) {
+        } catch (TransportException $transportException) {
             $response = new ErrorResponse($url, $method);
             $this->manageException($transportException, $response);
         } catch (ServerException $serverException) {
@@ -58,8 +57,15 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
             $response = $clientException->getResponse();
             $this->manageException($clientException, $response);
         } catch (\Exception $exception) {
-            $this->logger->error(sprintf('Error before request %s with method %s with this exception: %s', $url, $method, $exception->getMessage()));
-            
+            $this->logger->error(
+                sprintf(
+                    'Error before request %s with method %s with this exception: %s',
+                    $url,
+                    $method,
+                    $exception->getMessage()
+                )
+            );
+
             throw $exception;
         }
 
@@ -68,12 +74,12 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
 
     /**
      * Manage Exception
-     * 
+     *
      * @param ExceptionInterface $exception an ExceptionInterface instance
      * @param string $method method call
      * @param string $url url call
      * @param array $options list of options
-     * 
+     *
      * @return void
      */
     private function manageException(ExceptionInterface $exception, ResponseInterface $response): void

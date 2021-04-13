@@ -6,12 +6,12 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\RetryHttpClientBehaviorFactory;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehaviorFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehavior;
 
 class RetryHttpClientBehaviorFactoryTest extends TestCase
@@ -52,9 +52,13 @@ class RetryHttpClientBehaviorFactoryTest extends TestCase
             "number" => 5,
             "timeBeforeRetry" => 5,
         ];
-        
-        $retryHttpClient = $this->retryHttpClient->createDecoratedHttpClient($this->logger, $this->httpClient, $options);
-        
+
+        $retryHttpClient = $this->retryHttpClient->createDecoratedHttpClient(
+            $this->httpClient,
+            $options,
+            $this->logger
+        );
+
         $this->assertInstanceOf(RetryHttpClientBehavior::class, $retryHttpClient);
     }
 

@@ -19,13 +19,14 @@
         }
     },
     "require": {
-        "3slab/vdm-library-bundle": "^2.0@beta",
+        "3slab/vdm-library-bundle": "dev-3.x-dev",
         "symfony/http-client": "^5.0"
     },
     "require-dev": {
         "ext-xml": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
-        "phpunit/phpunit": "^9"
+        "phpunit/phpunit": "^9",
+        "squizlabs/php_codesniffer": "^3.6"
     }
 }

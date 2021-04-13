@@ -11,7 +11,7 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryRegistry;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
 
 class HttpClientBehaviorCreateCompilerPass implements CompilerPassInterface
 {
@@ -24,8 +24,8 @@ class HttpClientBehaviorCreateCompilerPass implements CompilerPassInterface
         $definition = $container->findDefinition(HttpClientBehaviorFactoryRegistry::class);
         $taggedServices = $container->findTaggedServiceIds('vdm_library.http_decorator_factory');
 
-        foreach ($taggedServices as $id => $tags) {   
+        foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('addFactory', [new Reference($id), $id::priority()]);
-        } 
+        }
     }
 }

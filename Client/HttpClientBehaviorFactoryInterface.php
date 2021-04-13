@@ -6,7 +6,7 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -15,7 +15,11 @@ interface HttpClientBehaviorFactoryInterface
 {
     public static function priority(int $priority = 0);
 
-    public function createDecoratedHttpClient(LoggerInterface $logger, HttpClientInterface $httpClient, array $options);
+    public function createDecoratedHttpClient(
+        HttpClientInterface $httpClient,
+        array $options,
+        LoggerInterface $logger = null
+    );
 
     public function support(array $options);
 }

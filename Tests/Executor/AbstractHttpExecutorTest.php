@@ -37,8 +37,8 @@ class AbstractHttpExecutorTest extends TestCase
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->httpExecutor = $this->getMockForAbstractClass(
-            DefaultHttpExecutor::class, 
-            [$this->logger, $this->httpClient]
+            DefaultHttpExecutor::class,
+            [$this->httpClient, $this->logger]
         );
     }
 

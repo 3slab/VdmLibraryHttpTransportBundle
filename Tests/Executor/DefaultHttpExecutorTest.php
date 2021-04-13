@@ -36,7 +36,7 @@ class DefaultHttpExecutorTest extends TestCase
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->httpClient, $this->logger);
     }
 
     public function testExecute()
@@ -46,7 +46,7 @@ class DefaultHttpExecutorTest extends TestCase
         $options = [];
 
         $iterator = $this->httpExecutor->execute($dsn, $method, $options);
-        $stamps = $iterator->current()->all();  
+        $stamps = $iterator->current()->all();
 
         $this->assertInstanceOf(Envelope::class, $iterator->current());
         $this->assertArrayHasKey(StopAfterHandleStamp::class, $stamps);

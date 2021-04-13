@@ -11,10 +11,9 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Transport;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Envelope;
-use Vdm\Bundle\LibraryBundle\Model\Message;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
+use Vdm\Bundle\LibraryHttpTransportBundle\Message\HttpMessage;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransport;
 
 class HttpTransportTest extends TestCase
@@ -43,12 +42,12 @@ class HttpTransportTest extends TestCase
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->httpClient, $this->logger);
     }
 
     public function testGet()
     {
-        $httpTransport= new HttpTransport($this->httpExecutor, "https://ipconfig.io/json", "GET", []);
+        $httpTransport = new HttpTransport($this->httpExecutor, "https://ipconfig.io/json", "GET", []);
         $array = $httpTransport->get();
 
         $this->assertEquals(Envelope::class, get_class($array->current()));
@@ -65,7 +64,7 @@ class HttpTransportTest extends TestCase
 
         $this->expectException(\Exception::class);
 
-        $envelope = new Envelope(new Message(""));
-        $httpTransport->send($envelope);        
+        $envelope = new Envelope(new HttpMessage(""));
+        $httpTransport->send($envelope);
     }
 }

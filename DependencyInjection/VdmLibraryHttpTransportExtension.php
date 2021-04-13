@@ -12,7 +12,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryInterface;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\AbstractHttpExecutor;
 
 /**
@@ -33,10 +33,10 @@ class VdmLibraryHttpTransportExtension extends Extension
         $container->registerForAutoconfiguration(HttpClientBehaviorFactoryInterface::class)
             ->addTag('vdm_library.http_decorator_factory')
         ;
-        
+
         $loader = new YamlFileLoader(
             $container,
-            new FileLocator(__DIR__.'/../Resources/config')
+            new FileLocator(__DIR__ . '/../Resources/config')
         );
         $loader->load('services.yaml');
     }

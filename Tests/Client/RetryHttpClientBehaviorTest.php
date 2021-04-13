@@ -47,7 +47,7 @@ class RetryHttpClientBehaviorTest extends TestCase
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->eventDispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $this->retryHttpClient = new RetryHttpClientBehavior($this->logger, $this->httpClient, 5, 5);
+        $this->retryHttpClient = new RetryHttpClientBehavior($this->httpClient, 5, 5, $this->logger);
     }
 
     public function testRequest()
@@ -59,9 +59,9 @@ class RetryHttpClientBehaviorTest extends TestCase
 
     public function testRequestTransportException()
     {
-        $retry = rand(1,4);
+        $retry = rand(1, 4);
 
-        $retryHttpClientException = new RetryHttpClientBehavior($this->logger, $this->httpClient, $retry-1, 1);
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
 
         $exception = new TransportException();
         $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);
@@ -71,9 +71,9 @@ class RetryHttpClientBehaviorTest extends TestCase
 
     public function testRequestServerException()
     {
-        $retry = rand(1,4);
+        $retry = rand(1, 4);
 
-        $retryHttpClientException = new RetryHttpClientBehavior($this->logger, $this->httpClient, $retry-1, 1);
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
 
         $exception = new ServerException(new MockResponse(''));
         $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);
@@ -83,9 +83,9 @@ class RetryHttpClientBehaviorTest extends TestCase
 
     public function testRequestClientException()
     {
-        $retry = rand(1,4);
+        $retry = rand(1, 4);
 
-        $retryHttpClientException = new RetryHttpClientBehavior($this->logger, $this->httpClient, $retry-1, 1);
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
 
         $exception = new ClientException(new MockResponse(''));
         $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);

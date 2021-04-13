@@ -6,11 +6,10 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehavior;
 
 class RetryHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterface
 {
@@ -19,8 +18,11 @@ class RetryHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterfa
         return $priority;
     }
 
-    public function createDecoratedHttpClient(LoggerInterface $logger, HttpClientInterface $httpClient, array $options)
-    {
+    public function createDecoratedHttpClient(
+        HttpClientInterface $httpClient,
+        array $options,
+        LoggerInterface $logger = null
+    ) {
         $number = 5;
         $timeBeforeRetry = 5;
 
@@ -31,7 +33,7 @@ class RetryHttpClientBehaviorFactory implements HttpClientBehaviorFactoryInterfa
             $timeBeforeRetry = $options['retry']['timeBeforeRetry'];
         }
 
-        return new RetryHttpClientBehavior($logger, $httpClient, $number, $timeBeforeRetry);
+        return new RetryHttpClientBehavior($httpClient, $number, $timeBeforeRetry, $logger);
     }
 
     public function support(array $options)

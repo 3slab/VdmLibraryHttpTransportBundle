@@ -6,13 +6,13 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\MonitoringHttpClientBehaviorFactory;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehaviorFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehavior;
 
 class MonitoringHttpClientBehaviorFactoryTest extends TestCase
@@ -45,7 +45,7 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
 
         $this->monitoringHttpClient = new MonitoringHttpClientBehaviorFactory($this->eventDispatcher);
     }
-    
+
     public function testPriority()
     {
         $monitoring = MonitoringHttpClientBehaviorFactory::priority(5);
@@ -55,8 +55,12 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
 
     public function testCreateDecoratedHttpClient()
     {
-        $monitoringHttpClient = $this->monitoringHttpClient->createDecoratedHttpClient($this->logger, $this->httpClient, []);
-        
+        $monitoringHttpClient = $this->monitoringHttpClient->createDecoratedHttpClient(
+            $this->httpClient,
+            [],
+            $this->logger
+        );
+
         $this->assertInstanceOf(MonitoringHttpClientBehavior::class, $monitoringHttpClient);
     }
 

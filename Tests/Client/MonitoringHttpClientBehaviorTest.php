@@ -47,7 +47,11 @@ class MonitoringHttpClientBehaviorTest extends TestCase
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->eventDispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $this->monitoringHttpClient = new MonitoringHttpClientBehavior($this->logger, $this->httpClient, $this->eventDispatcher);
+        $this->monitoringHttpClient = new MonitoringHttpClientBehavior(
+            $this->httpClient,
+            $this->eventDispatcher,
+            $this->logger
+        );
     }
 
     public function testRequest()

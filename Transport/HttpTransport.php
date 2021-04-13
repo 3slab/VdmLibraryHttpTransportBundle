@@ -14,22 +14,22 @@ use Vdm\Bundle\LibraryHttpTransportBundle\Executor\AbstractHttpExecutor;
 
 class HttpTransport implements TransportInterface
 {
-    /** 
+    /**
      * @var AbstractHttpExecutor $httpExecutor
     */
     private $httpExecutor;
 
-    /** 
+    /**
      * @var string $dsn
     */
     private $dsn;
 
-    /** 
+    /**
      * @var string $method
     */
     private $method;
 
-    /** 
+    /**
      * @var array $options
     */
     private $options;

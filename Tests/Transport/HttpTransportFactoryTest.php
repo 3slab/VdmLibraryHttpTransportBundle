@@ -12,11 +12,10 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryBundle\Monitoring\StatsStorageInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransportFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransport;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryRegistry;
+use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
 
 class HttpTransportFactoryTest extends TestCase
 {
@@ -43,18 +42,21 @@ class HttpTransportFactoryTest extends TestCase
     protected function setUp(): void
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $this->statsStorageInterface = $this->getMockBuilder(StatsStorageInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->serializer = $this->getMockBuilder(SerializerInterface::class)->getMock();
-        $this->httpExecutor = new DefaultHttpExecutor($this->logger, $this->httpClient);
+        $this->httpExecutor = new DefaultHttpExecutor($this->httpClient, $this->logger);
         $this->httpClientBehaviorFactoryRegistry = $this
                         ->getMockBuilder(HttpClientBehaviorFactoryRegistry::class)
                         ->setConstructorArgs([$this->logger])
                         ->setMethods(['create'])
                         ->getMock();
-        
+
         $this->httpClientBehaviorFactoryRegistry->method('create')->willReturn($this->httpClient);
-        $this->httpTransportFactory = new HttpTransportFactory($this->logger, $this->statsStorageInterface, $this->httpExecutor, $this->httpClientBehaviorFactoryRegistry);
+        $this->httpTransportFactory = new HttpTransportFactory(
+            $this->httpExecutor,
+            $this->httpClientBehaviorFactoryRegistry,
+            $this->logger
+        );
     }
 
     public function testCreateTransport()
@@ -93,6 +95,5 @@ class HttpTransportFactoryTest extends TestCase
             "sftp://ipconfig.io/json",
             false
         ];
-
     }
 }

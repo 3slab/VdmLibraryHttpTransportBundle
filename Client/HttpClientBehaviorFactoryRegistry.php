@@ -6,33 +6,33 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Behavior\HttpClientBehaviorFactoryInterface;
 
 class HttpClientBehaviorFactoryRegistry
 {
-    /** 
+    /**
      * @var LoggerInterface $logger
     */
     private $logger;
 
-    /** 
+    /**
      * @var HttpClientInterface $httpClient
     */
     private $httpClient;
 
-    /** 
+    /**
      * @var HttpClientBehaviorFactoryInterface[] $httpClientBehavior
     */
     private $httpClientBehavior;
 
-    public function __construct(LoggerInterface $messengerLogger)
+    public function __construct(LoggerInterface $vdmLogger = null)
     {
-        $this->logger = $messengerLogger;
         $this->httpClientBehavior = [];
+        $this->logger = $vdmLogger ?? new NullLogger();
     }
 
     public function addFactory(HttpClientBehaviorFactoryInterface $httpClientBehavior, string $priority)
@@ -47,7 +47,11 @@ class HttpClientBehaviorFactoryRegistry
 
         foreach ($this->httpClientBehavior as $httpClientBehavior) {
             if ($httpClientBehavior->support($options)) {
-                $this->httpClient = $httpClientBehavior->createDecoratedHttpClient($this->logger, $this->httpClient, $options);
+                $this->httpClient = $httpClientBehavior->createDecoratedHttpClient(
+                    $this->httpClient,
+                    $options,
+                    $this->logger
+                );
             }
         }
 

@@ -10,7 +10,6 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
@@ -29,11 +28,6 @@ class DecoratorHttpClientTest extends TestCase
     private $httpClient;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $eventDispatcher
-     */
-    private $eventDispatcher;
-
-    /**
      * @var DecoratorHttpClient $decoratorHttpClient
      */
     private $decoratorHttpClient;
@@ -42,11 +36,10 @@ class DecoratorHttpClientTest extends TestCase
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
-        $this->eventDispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
         $this->decoratorHttpClient = $this->getMockForAbstractClass(
-            DecoratorHttpClient::class, 
-            [$this->logger, $this->httpClient, $this->eventDispatcher]
+            DecoratorHttpClient::class,
+            [$this->httpClient, $this->logger]
         );
     }
 

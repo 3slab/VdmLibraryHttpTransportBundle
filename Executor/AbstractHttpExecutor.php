@@ -12,12 +12,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class AbstractHttpExecutor
 {
-    /** 
+    /**
      * @var HttpClientInterface $httpClient
     */
     protected $httpClient;
 
-    public function __construct(HttpClientInterface $httpClient) {
+    public function __construct(HttpClientInterface $httpClient)
+    {
         $this->httpClient = $httpClient;
     }
 

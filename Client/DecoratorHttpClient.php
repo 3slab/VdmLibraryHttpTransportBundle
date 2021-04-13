@@ -9,27 +9,29 @@
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
 abstract class DecoratorHttpClient implements HttpClientInterface
 {
-    /** 
+    /**
      * @var LoggerInterface $logger
     */
     protected $logger;
 
-    /** 
+    /**
      * @var HttpClientInterface $httpClient
     */
     protected $httpClientDecorated;
 
-    public function __construct(LoggerInterface $logger, HttpClientInterface $httpClient) {
+    public function __construct(HttpClientInterface $httpClient, LoggerInterface $vdmLogger = null)
+    {
         $this->httpClientDecorated = $httpClient;
-        $this->logger = $logger;
+        $this->logger = $vdmLogger ?? new NullLogger();
     }
-    
+
     /**
      * {@inheritDoc}
      */

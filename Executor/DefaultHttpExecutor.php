@@ -9,25 +9,25 @@
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Executor;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vdm\Bundle\LibraryBundle\Model\Message;
 use Vdm\Bundle\LibraryBundle\Stamp\StopAfterHandleStamp;
+use Vdm\Bundle\LibraryHttpTransportBundle\Message\HttpMessage;
 
 class DefaultHttpExecutor extends AbstractHttpExecutor
 {
-    /** 
-     * @var LoggerInterface 
+    /**
+     * @var LoggerInterface
     */
     private $logger;
 
     public function __construct(
-        LoggerInterface $logger,
-        HttpClientInterface $httpClient
-    ) 
-    {
+        HttpClientInterface $httpClient,
+        LoggerInterface $vdmLogger = null
+    ) {
         parent::__construct($httpClient);
-        $this->logger = $logger;
+        $this->logger = $vdmLogger ?? new NullLogger();
     }
 
     public function execute(string $dsn, string $method, array $options): iterable
@@ -37,7 +37,7 @@ class DefaultHttpExecutor extends AbstractHttpExecutor
         $response = $this->httpClient->request($method, $dsn, $options);
         $this->logger->debug('Request exec...');
 
-        $message = new Message($response->getContent());
+        $message = new HttpMessage($response->getContent());
         yield new Envelope($message, [new StopAfterHandleStamp()]);
     }
 }
