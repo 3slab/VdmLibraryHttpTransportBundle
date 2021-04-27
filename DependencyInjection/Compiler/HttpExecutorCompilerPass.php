@@ -25,11 +25,11 @@ class HttpExecutorCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has(HttpExecutorRegistry::class)) {
+        if (!$container->hasDefinition(HttpExecutorRegistry::class)) {
             return;
         }
 
-        $definition = $container->get(HttpExecutorRegistry::class);
+        $definition = $container->getDefinition(HttpExecutorRegistry::class);
         $taggedServices = $container->findTaggedServiceIds('vdm_library.http_executor');
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('addExecutor', [new Reference($id), $id]);

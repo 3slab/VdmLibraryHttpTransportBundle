@@ -71,6 +71,8 @@ class HttpTransport implements TransportInterface, TransportCollectableInterface
      */
     public function get(): iterable
     {
+        $this->logger->debug(sprintf('Http transport get starts'));
+
         $generator = $this->httpExecutor->execute($this->dsn, $this->method, $this->options);
         while ($generator->valid()) {
             /** @var Envelope $envelope */
@@ -82,10 +84,11 @@ class HttpTransport implements TransportInterface, TransportCollectableInterface
             // if it is the send and the envelope yielded has no StopAfterHandleStamp, add it
             $stamps = [];
             if (!$generator->valid() && !$envelope->last(StopAfterHandleStamp::class)) {
-                $this->logger->debug('add StopAfterHandleStamp on last message sent by the http transport');
+                $this->logger->debug('Http transport adds StopAfterHandleStamp on last message sent by the executor');
                 $stamps[] = new StopAfterHandleStamp();
             }
 
+            $this->logger->debug('Http transport yields message');
             yield $envelope->with(...$stamps);
         }
     }

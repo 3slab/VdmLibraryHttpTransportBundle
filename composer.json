@@ -19,7 +19,7 @@
         }
     },
     "require": {
-        "3slab/vdm-library-bundle": "dev-3.x-dev",
+        "3slab/vdm-library-bundle": "^3.0",
         "symfony/http-client": "^5.0"
     },
     "require-dev": {
@@ -28,5 +28,10 @@
         "ext-mbstring": "*",
         "phpunit/phpunit": "^9",
         "squizlabs/php_codesniffer": "^3.6"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.x-dev"
+        }
     }
 }

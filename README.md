@@ -63,25 +63,19 @@ use Vdm\Bundle\LibraryBundle\Stamp\StopAfterHandleStamp;
 
 class CustomHttpExecutor extends AbstractHttpExecutor
 {
-    /** 
-     * @var LoggerInterface 
-    */
-    private $logger;
-
     public function __construct(
-        LoggerInterface $logger,
-        HttpClientInterface $httpClient
-    ) 
-    {
-        parent::__construct($httpClient);
-        $this->logger = $logger;
+        HttpClientInterface $httpClient,
+        LoggerInterface $vdmLogger = null
+    ) {
+        parent::__construct($httpClient, $vdmLogger);
     }
 
     public function execute(string $dsn, string $method, array $options): iterable
     {
+        // In HttpClient, request just build the request but does not execute it
         $response = $this->httpClient->request($method, $dsn, $options);
 
-        $message = new Message($response->getContent());
+        $message = new HttpMessage($response->getContent());
         yield new Envelope($message, [new StopAfterHandleStamp()]);
     }
 }

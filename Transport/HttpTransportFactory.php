@@ -69,8 +69,8 @@ class HttpTransportFactory implements TransportFactoryInterface
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
-        $method = $options['method'];
-        $http_options = $options['http_options'];
+        $method = $options['method'] ?? 'GET';
+        $http_options = $options['http_options'] ?? [];
 
         $executor = $this->httpExecutorRegistry->getDefault();
         if (isset($options['http_executor'])) {
@@ -85,7 +85,7 @@ class HttpTransportFactory implements TransportFactoryInterface
         );
         $executor->setHttpClient($httpClientDecorated);
 
-        return new HttpTransport($executor, $dsn, $method, $http_options);
+        return new HttpTransport($executor, $dsn, $method, $http_options, $this->logger);
     }
 
     /**

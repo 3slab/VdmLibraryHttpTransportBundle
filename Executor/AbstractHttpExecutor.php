@@ -8,6 +8,7 @@
 
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Executor;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -22,12 +23,19 @@ abstract class AbstractHttpExecutor
     protected $httpClient;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * AbstractHttpExecutor constructor.
      * @param HttpClientInterface $httpClient
+     * @param LoggerInterface|null $vdmLogger
      */
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, LoggerInterface $vdmLogger = null)
     {
         $this->httpClient = $httpClient;
+        $this->logger = $vdmLogger;
     }
 
     /**
