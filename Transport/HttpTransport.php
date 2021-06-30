@@ -73,7 +73,7 @@ class HttpTransport implements TransportInterface, TransportCollectableInterface
     {
         $this->logger->debug(sprintf('Http transport get starts'));
 
-        $generator = $this->httpExecutor->execute($this->dsn, $this->method, $this->options);
+        $generator = $this->httpExecutor->get($this->dsn, $this->method, $this->options);
         while ($generator->valid()) {
             /** @var Envelope $envelope */
             $envelope = $generator->current();
@@ -98,6 +98,7 @@ class HttpTransport implements TransportInterface, TransportCollectableInterface
      */
     public function ack(Envelope $envelope): void
     {
+        $this->httpExecutor->ack($envelope);
     }
 
     /**
@@ -105,6 +106,7 @@ class HttpTransport implements TransportInterface, TransportCollectableInterface
      */
     public function reject(Envelope $envelope): void
     {
+        $this->httpExecutor->reject($envelope);
     }
 
     /**

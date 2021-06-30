@@ -51,4 +51,17 @@ class DefaultHttpExecutorTest extends TestCase
         $this->assertInstanceOf(Envelope::class, $iterator->current());
         $this->assertArrayHasKey(StopAfterHandleStamp::class, $stamps);
     }
+
+    public function testGet()
+    {
+        $dsn = "https://ipconfig.io/json";
+        $method = "GET";
+        $options = [];
+
+        $iterator = $this->httpExecutor->get($dsn, $method, $options);
+        $stamps = $iterator->current()->all();
+
+        $this->assertInstanceOf(Envelope::class, $iterator->current());
+        $this->assertArrayHasKey(StopAfterHandleStamp::class, $stamps);
+    }
 }
