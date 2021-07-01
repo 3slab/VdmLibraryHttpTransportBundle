@@ -1,5 +1,7 @@
 # VdmLibrary messenger HTTP transport
 
+[![Build Status](https://travis-ci.com/3slab/VdmLibraryHttpTransportBundle.svg?branch=3.x-dev)](https://travis-ci.com/3slab/VdmLibraryHttpTransportBundle)
+
 This symfony messenger extension provides a transport to pull data from a HTTP source. 
 
 ## Installation
