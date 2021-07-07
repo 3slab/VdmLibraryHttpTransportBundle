@@ -12,13 +12,13 @@ use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
 use Vdm\Bundle\LibraryBundle\Service\Monitoring\MonitoringService;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Event\HttpClientReceivedResponseEvent;
+use Vdm\Bundle\LibraryHttpTransportBundle\Event\HttpClientReceivedResponseEvent;
 
 class MonitoringHttpClientSubscriber implements EventSubscriberInterface
 {
     public const STATUS_CODE_STAT = 'vdm.http.status_code';
     public const RESPONSE_TIME_STAT = 'vdm.http.response_time';
-    public const RESPONSE_SIZE_STAT = 'http.response_size';
+    public const RESPONSE_SIZE_STAT = 'vdm.http.response_size';
 
     /**
      * @var MonitoringService
@@ -54,8 +54,8 @@ class MonitoringHttpClientSubscriber implements EventSubscriberInterface
         $statusCode = $response->getStatusCode();
         $responseInfo = $response->getInfo();
 
-        $bodySize = $responseInfo['size_download'];
-        $time = $responseInfo['total_time'];
+        $bodySize = $responseInfo['size_download'] ?? null;
+        $time = $responseInfo['total_time'] ?? null;
 
         $tags = [
             "statusCode" => $statusCode

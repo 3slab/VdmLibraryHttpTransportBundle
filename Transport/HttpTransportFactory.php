@@ -72,9 +72,10 @@ class HttpTransportFactory implements TransportFactoryInterface
         $method = $options['method'] ?? 'GET';
         $http_options = $options['http_options'] ?? [];
 
-        $executor = $this->httpExecutorRegistry->getDefault();
         if (isset($options['http_executor'])) {
             $executor = $this->httpExecutorRegistry->get($options['http_executor']);
+        } else {
+            $executor = $this->httpExecutorRegistry->getDefault();
         }
 
         $this->logger->debug(sprintf('Http executor loaded is an instance of "%s"', get_class($executor)));

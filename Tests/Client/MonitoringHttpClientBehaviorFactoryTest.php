@@ -8,6 +8,7 @@
 
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -18,24 +19,24 @@ use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehavior;
 class MonitoringHttpClientBehaviorFactoryTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $logger
+     * @var MockObject $logger
      */
     private $logger;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
+     * @var MockObject $httpClient
      */
     private $httpClient;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $eventDispatcher
+     * @var MockObject $eventDispatcher
      */
     private $eventDispatcher;
 
     /**
-     * @var MonitoringHttpClientBehaviorFactory $monitoringHttpClient
+     * @var MonitoringHttpClientBehaviorFactory $factory
      */
-    private $monitoringHttpClient;
+    private $factory;
 
     protected function setUp(): void
     {
@@ -43,7 +44,7 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
         $this->eventDispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $this->monitoringHttpClient = new MonitoringHttpClientBehaviorFactory($this->eventDispatcher);
+        $this->factory = new MonitoringHttpClientBehaviorFactory($this->eventDispatcher);
     }
 
     public function testPriority()
@@ -55,7 +56,7 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
 
     public function testCreateDecoratedHttpClient()
     {
-        $monitoringHttpClient = $this->monitoringHttpClient->createDecoratedHttpClient(
+        $monitoringHttpClient = $this->factory->createDecoratedHttpClient(
             $this->httpClient,
             [],
             $this->logger
@@ -69,7 +70,7 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
         $options["monitoring"] = [
             "enabled" => true
         ];
-        $result = $this->monitoringHttpClient->support($options);
+        $result = $this->factory->support($options);
 
         $this->assertTrue($result);
     }
@@ -79,7 +80,7 @@ class MonitoringHttpClientBehaviorFactoryTest extends TestCase
         $options["monitoring"] = [
             "enabled" => false
         ];
-        $result = $this->monitoringHttpClient->support($options);
+        $result = $this->factory->support($options);
 
         $this->assertFalse($result);
     }

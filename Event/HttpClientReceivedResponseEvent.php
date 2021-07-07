@@ -6,7 +6,7 @@
  * @license    https://github.com/3slab/VdmLibraryHttpTransportBundle/blob/master/LICENSE
  */
 
-namespace Vdm\Bundle\LibraryHttpTransportBundle\Client\Event;
+namespace Vdm\Bundle\LibraryHttpTransportBundle\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Contracts\HttpClient\ResponseInterface;

@@ -10,25 +10,36 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\HttpClient\DecoratorTrait;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
-use Vdm\Bundle\LibraryHttpTransportBundle\Client\Event\HttpClientReceivedResponseEvent;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\Model\ErrorResponse;
+use Vdm\Bundle\LibraryHttpTransportBundle\Event\HttpClientReceivedResponseEvent;
 
 /**
  * Class MonitoringHttpClientBehavior
  * @package Vdm\Bundle\LibraryHttpTransportBundle\Client
  */
-class MonitoringHttpClientBehavior extends DecoratorHttpClient
+class MonitoringHttpClientBehavior implements HttpClientInterface
 {
+    use DecoratorTrait {
+        DecoratorTrait::__construct as private __dtConstruct;
+    }
+
     /**
      * @var EventDispatcherInterface $eventDispatcher
      */
-    private $eventDispatcher;
+    protected $eventDispatcher;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     /**
      * MonitoringHttpClientBehavior constructor
@@ -41,8 +52,9 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
         EventDispatcherInterface $eventDispatcher,
         LoggerInterface $vdmLogger = null
     ) {
-        parent::__construct($httpClient, $vdmLogger);
+        $this->__dtConstruct($httpClient);
         $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $vdmLogger  ?? new NullLogger();
     }
 
     /**
@@ -51,7 +63,7 @@ class MonitoringHttpClientBehavior extends DecoratorHttpClient
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
         try {
-            $response = $this->httpClientDecorated->request($method, $url, $options);
+            $response = $this->client->request($method, $url, $options);
             $response->getHeaders(); // Use to trigger in case of exception
             $this->eventDispatcher->dispatch(new HttpClientReceivedResponseEvent($response));
         } catch (TransportException $transportException) {

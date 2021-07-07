@@ -8,6 +8,7 @@
 
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -22,17 +23,17 @@ use Vdm\Bundle\LibraryHttpTransportBundle\Client\MonitoringHttpClientBehavior;
 class MonitoringHttpClientBehaviorTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $logger
+     * @var MockObject $logger
      */
     private $logger;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
+     * @var MockObject $httpClient
      */
     private $httpClient;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $eventDispatcher
+     * @var MockObject $eventDispatcher
      */
     private $eventDispatcher;
 

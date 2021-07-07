@@ -49,7 +49,7 @@ class HttpExecutorRegistry
     public function addExecutor(AbstractHttpExecutor $executor, string $id): void
     {
         $this->executors[$id] = $executor;
-        if ($executor instanceof DefaultHttpExecutor) {
+        if (get_class($executor) === DefaultHttpExecutor::class) {
             $this->defaultExecutor = $executor;
         }
     }

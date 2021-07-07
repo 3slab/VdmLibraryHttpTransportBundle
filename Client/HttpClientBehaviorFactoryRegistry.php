@@ -29,9 +29,9 @@ class HttpClientBehaviorFactoryRegistry
     private $httpClient;
 
     /**
-     * @var HttpClientBehaviorFactoryInterface[] $httpClientBehavior
+     * @var HttpClientBehaviorFactoryInterface[] $httpClientBehaviors
     */
-    private $httpClientBehavior;
+    private $httpClientBehaviors;
 
     /**
      * HttpClientBehaviorFactoryRegistry constructor.
@@ -39,7 +39,7 @@ class HttpClientBehaviorFactoryRegistry
      */
     public function __construct(LoggerInterface $vdmLogger = null)
     {
-        $this->httpClientBehavior = [];
+        $this->httpClientBehaviors = [];
         $this->logger = $vdmLogger ?? new NullLogger();
     }
 
@@ -49,8 +49,8 @@ class HttpClientBehaviorFactoryRegistry
      */
     public function addFactory(HttpClientBehaviorFactoryInterface $httpClientBehavior, string $priority): void
     {
-        $this->httpClientBehavior[$priority] = $httpClientBehavior;
-        ksort($this->httpClientBehavior);
+        $this->httpClientBehaviors[$priority] = $httpClientBehavior;
+        ksort($this->httpClientBehaviors);
     }
 
     /**
@@ -62,7 +62,7 @@ class HttpClientBehaviorFactoryRegistry
     {
         $this->httpClient = $httpClient;
 
-        foreach ($this->httpClientBehavior as $httpClientBehavior) {
+        foreach ($this->httpClientBehaviors as $httpClientBehavior) {
             if ($httpClientBehavior->support($options)) {
                 $this->httpClient = $httpClientBehavior->createDecoratedHttpClient(
                     $this->httpClient,

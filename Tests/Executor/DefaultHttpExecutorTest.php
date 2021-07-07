@@ -10,10 +10,12 @@ namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Executor;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
 use Vdm\Bundle\LibraryBundle\Stamp\StopAfterHandleStamp;
+use Vdm\Bundle\LibraryHttpTransportBundle\Message\HttpMessage;
 
 class DefaultHttpExecutorTest extends TestCase
 {
@@ -36,6 +38,13 @@ class DefaultHttpExecutorTest extends TestCase
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
+        $this->httpClient
+            ->expects($this->once())
+            ->method('request')
+            ->with("GET", "https://ipconfig.io/json", [])
+            ->willReturn(
+                MockResponse::fromRequest("GET", "https://ipconfig.io/json", [], new MockResponse('{"body":"value"}'))
+            );
         $this->httpExecutor = new DefaultHttpExecutor($this->httpClient, $this->logger);
     }
 
@@ -46,9 +55,12 @@ class DefaultHttpExecutorTest extends TestCase
         $options = [];
 
         $iterator = $this->httpExecutor->execute($dsn, $method, $options);
-        $stamps = $iterator->current()->all();
+        $message = $iterator->current();
+        $stamps = $message->all();
 
-        $this->assertInstanceOf(Envelope::class, $iterator->current());
+        $this->assertInstanceOf(Envelope::class, $message);
+        $this->assertInstanceOf(HttpMessage::class, $message->getMessage());
+        $this->assertEquals('{"body":"value"}', $message->getMessage()->getPayload());
         $this->assertArrayHasKey(StopAfterHandleStamp::class, $stamps);
     }
 
@@ -59,9 +71,12 @@ class DefaultHttpExecutorTest extends TestCase
         $options = [];
 
         $iterator = $this->httpExecutor->get($dsn, $method, $options);
-        $stamps = $iterator->current()->all();
+        $message = $iterator->current();
+        $stamps = $message->all();
 
-        $this->assertInstanceOf(Envelope::class, $iterator->current());
+        $this->assertInstanceOf(Envelope::class, $message);
+        $this->assertInstanceOf(HttpMessage::class, $message->getMessage());
+        $this->assertEquals('{"body":"value"}', $message->getMessage()->getPayload());
         $this->assertArrayHasKey(StopAfterHandleStamp::class, $stamps);
     }
 }

@@ -8,6 +8,7 @@
 
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -17,26 +18,26 @@ use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehavior;
 class RetryHttpClientBehaviorFactoryTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $logger
+     * @var MockObject $logger
      */
     private $logger;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
+     * @var MockObject $httpClient
      */
     private $httpClient;
 
     /**
-     * @var RetryHttpClientBehaviorFactory $retryHttpClient
+     * @var RetryHttpClientBehaviorFactory $factory
      */
-    private $retryHttpClient;
+    private $factory;
 
     protected function setUp(): void
     {
         $this->logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $this->httpClient = $this->getMockBuilder(HttpClientInterface::class)->getMock();
 
-        $this->retryHttpClient = new RetryHttpClientBehaviorFactory();
+        $this->factory = new RetryHttpClientBehaviorFactory();
     }
 
     public function testPriority()
@@ -53,7 +54,7 @@ class RetryHttpClientBehaviorFactoryTest extends TestCase
             "timeBeforeRetry" => 5,
         ];
 
-        $retryHttpClient = $this->retryHttpClient->createDecoratedHttpClient(
+        $retryHttpClient = $this->factory->createDecoratedHttpClient(
             $this->httpClient,
             $options,
             $this->logger
@@ -68,7 +69,7 @@ class RetryHttpClientBehaviorFactoryTest extends TestCase
         $options["retry"] = [
             "enabled" => true
         ];
-        $result = $this->retryHttpClient->support($options);
+        $result = $this->factory->support($options);
 
         $this->assertTrue($result);
     }
@@ -78,7 +79,7 @@ class RetryHttpClientBehaviorFactoryTest extends TestCase
         $options["retry"] = [
             "enabled" => false
         ];
-        $result = $this->retryHttpClient->support($options);
+        $result = $this->factory->support($options);
 
         $this->assertFalse($result);
     }

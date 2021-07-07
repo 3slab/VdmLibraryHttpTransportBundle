@@ -9,11 +9,12 @@
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Transport;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\DefaultHttpExecutor;
 use Vdm\Bundle\LibraryHttpTransportBundle\Executor\HttpExecutorRegistry;
+use Vdm\Bundle\LibraryHttpTransportBundle\Tests\Fixtures\AppBundle\Executor\CustomHttpExecutor;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransportFactory;
 use Vdm\Bundle\LibraryHttpTransportBundle\Transport\HttpTransport;
 use Vdm\Bundle\LibraryHttpTransportBundle\Client\HttpClientBehaviorFactoryRegistry;
@@ -84,5 +85,85 @@ class HttpTransportFactoryTest extends TestCase
             "sftp://ipconfig.io/json",
             false
         ];
+    }
+
+    public function testCreateTransportDefault()
+    {
+        $serializer = $this->createMock(SerializerInterface::class);
+        $httpClient = $this->createMock(HttpClientInterface::class);
+
+        $httpClientBehaviorFactoryRegistry = $this->createMock(HttpClientBehaviorFactoryRegistry::class);
+        $httpClientBehaviorFactoryRegistry
+            ->expects($this->once())
+            ->method('create')
+            ->with($httpClient, [])
+            ->willReturn($httpClient);
+
+        $executor = new DefaultHttpExecutor($httpClient);
+        $mockRegistry = $this->createMock(HttpExecutorRegistry::class);
+        $mockRegistry
+            ->expects($this->once())
+            ->method('getDefault')
+            ->willReturn($executor);
+        $mockRegistry
+            ->expects($this->never())
+            ->method('get');
+
+        $dsn = "https://ipconfig.io/json";
+
+        $factory = new HttpTransportFactory($mockRegistry, $httpClientBehaviorFactoryRegistry);
+        $transport = $factory->createTransport($dsn, [], $serializer);
+
+        $this->assertEquals($httpClient, $executor->getHttpClient());
+        $this->assertEquals([], $this->extractProtectedAttribute($transport, 'options'));
+        $this->assertEquals('GET', $this->extractProtectedAttribute($transport, 'method'));
+        $this->assertEquals($dsn, $this->extractProtectedAttribute($transport, 'dsn'));
+        $this->assertEquals($executor, $this->extractProtectedAttribute($transport, 'httpExecutor'));
+    }
+
+    public function testCreateTransportCustom()
+    {
+        $serializer = $this->createMock(SerializerInterface::class);
+        $httpClient = $this->createMock(HttpClientInterface::class);
+
+        $executor = new CustomHttpExecutor($httpClient);
+        $mockRegistry = $this->createMock(HttpExecutorRegistry::class);
+        $mockRegistry
+            ->expects($this->never())
+            ->method('getDefault');
+        $mockRegistry
+            ->expects($this->once())
+            ->method('get')
+            ->with('My\\Custom\\Executor')
+            ->willReturn($executor);
+
+        $dsn = "https://ipconfig.io/json";
+        $method = 'POST';
+        $httpOptions = ['headers' => ['Content-Type' => 'application/json']];
+        $options = ['method' => $method, 'http_options' => $httpOptions, 'http_executor' => 'My\\Custom\\Executor'];
+
+        $httpClientBehaviorFactoryRegistry = $this->createMock(HttpClientBehaviorFactoryRegistry::class);
+        $httpClientBehaviorFactoryRegistry
+            ->expects($this->once())
+            ->method('create')
+            ->with($httpClient, $options)
+            ->willReturn($httpClient);
+
+        $factory = new HttpTransportFactory($mockRegistry, $httpClientBehaviorFactoryRegistry);
+        $transport = $factory->createTransport($dsn, $options, $serializer);
+
+        $this->assertEquals($httpClient, $executor->getHttpClient());
+        $this->assertEquals($httpOptions, $this->extractProtectedAttribute($transport, 'options'));
+        $this->assertEquals($method, $this->extractProtectedAttribute($transport, 'method'));
+        $this->assertEquals($dsn, $this->extractProtectedAttribute($transport, 'dsn'));
+        $this->assertEquals($executor, $this->extractProtectedAttribute($transport, 'httpExecutor'));
+    }
+
+    protected function extractProtectedAttribute($transport, $attribute)
+    {
+        $reflection = new ReflectionClass($transport);
+        $property = $reflection->getProperty($attribute);
+        $property->setAccessible(true);
+        return $property->getValue($transport);
     }
 }

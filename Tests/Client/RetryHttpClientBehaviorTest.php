@@ -8,6 +8,7 @@
 
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Tests\Client;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -22,17 +23,17 @@ use Vdm\Bundle\LibraryHttpTransportBundle\Client\RetryHttpClientBehavior;
 class RetryHttpClientBehaviorTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $logger
+     * @var MockObject $logger
      */
     private $logger;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $httpClient
+     * @var MockObject $httpClient
      */
     private $httpClient;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject $eventDispatcher
+     * @var MockObject $eventDispatcher
      */
     private $eventDispatcher;
 
@@ -59,37 +60,49 @@ class RetryHttpClientBehaviorTest extends TestCase
 
     public function testRequestTransportException()
     {
-        $retry = rand(1, 4);
-
-        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
-
-        $exception = new TransportException();
-        $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);
         $this->expectException(TransportException::class);
+
+        $retry = 4;
+
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 0, $this->logger);
+
+        $this->httpClient
+            ->expects($this->exactly($retry))
+            ->method('request')
+            ->willThrowException(new TransportException());
+
         $retryHttpClientException->request("GET", "https://ipconfig.io/json", []);
     }
 
     public function testRequestServerException()
     {
-        $retry = rand(1, 4);
-
-        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
-
-        $exception = new ServerException(new MockResponse(''));
-        $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);
         $this->expectException(ServerException::class);
+
+        $retry = 4;
+
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 0, $this->logger);
+
+        $this->httpClient
+            ->expects($this->exactly($retry))
+            ->method('request')
+            ->willThrowException(new ServerException(new MockResponse('')));
+
         $retryHttpClientException->request("GET", "https://ipconfig.io/json", []);
     }
 
     public function testRequestClientException()
     {
-        $retry = rand(1, 4);
-
-        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 1, $this->logger);
-
-        $exception = new ClientException(new MockResponse(''));
-        $this->httpClient->expects($this->exactly($retry))->method('request')->willThrowException($exception);
         $this->expectException(ClientException::class);
+
+        $retry = 4;
+
+        $retryHttpClientException = new RetryHttpClientBehavior($this->httpClient, $retry - 1, 0, $this->logger);
+
+        $this->httpClient
+            ->expects($this->exactly($retry))
+            ->method('request')
+            ->willThrowException(new ClientException(new MockResponse('')));
+
         $retryHttpClientException->request("GET", "https://ipconfig.io/json", []);
     }
 }

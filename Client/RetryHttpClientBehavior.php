@@ -9,6 +9,8 @@
 namespace Vdm\Bundle\LibraryHttpTransportBundle\Client;
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\HttpClient\DecoratorTrait;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\HttpClient\Exception\TransportException;
@@ -16,8 +18,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 
-class RetryHttpClientBehavior extends DecoratorHttpClient
+class RetryHttpClientBehavior implements HttpClientInterface
 {
+    use DecoratorTrait {
+        DecoratorTrait::__construct as private __dtConstruct;
+    }
+
     /**
      * @var int $count
      */
@@ -34,19 +40,25 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
     protected $timeBeforeRetry;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * RetryHttpClientBehavior constructor.
      * @param HttpClientInterface $httpClient
      * @param int $retry
      * @param int $timeBeforeRetry
-     * @param LoggerInterface|null $logger
+     * @param LoggerInterface|null $vdmLogger
      */
     public function __construct(
         HttpClientInterface $httpClient,
         int $retry,
         int $timeBeforeRetry,
-        LoggerInterface $logger = null
+        LoggerInterface $vdmLogger = null
     ) {
-        parent::__construct($httpClient, $logger);
+        $this->__dtConstruct($httpClient);
+        $this->logger = $vdmLogger ?? new NullLogger();
         $this->retry = $retry;
         $this->timeBeforeRetry = $timeBeforeRetry;
     }
@@ -65,7 +77,7 @@ class RetryHttpClientBehavior extends DecoratorHttpClient
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
         try {
-            $response = $this->httpClientDecorated->request($method, $url, $options);
+            $response = $this->client->request($method, $url, $options);
             $statusCode = $response->getStatusCode();
             $response->getHeaders(); // Use to retry in case of exception
             $this->count = 0; // reset in case the client is reused for another request
